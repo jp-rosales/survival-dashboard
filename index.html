@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survivor Dashboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: #1a1a1a;
+            color: #e5e5e5;
+            min-height: 100vh;
+            padding: 20px;
+            background-image: 
+                radial-gradient(circle at 25% 25%, #2d2d2d 1px, transparent 1px),
+                radial-gradient(circle at 75% 75%, #2d2d2d 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+        
+        .dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            align-items: start;
+        }
+        
+        .character-section {
+            background: #2d2d2d;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            border: 1px solid #3d3d3d;
+        }
+        
+        .character-image {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #3d3d3d;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+        
+        .character-image img {
+            max-width: 180px;
+            max-height: 180px;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+        
+        .character-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #00d4aa;
+        }
+        
+        .badge {
+            background: #3d3d3d;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+        
+        .stats-section {
+            background: #2d2d2d;
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid #3d3d3d;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+        
+        .stat-item {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #3d3d3d;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+        
+        .stat-value {
+            font-size: 18px;
+            font-weight: 500;
+            color: #e5e5e5;
+        }
+        
+        .health-bar {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            border: 1px solid #3d3d3d;
+        }
+        
+        .health-hearts {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .health-status {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .level-bar {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            border: 1px solid #3d3d3d;
+        }
+        
+        .level-display {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        
+        .level-progress {
+            font-size: 14px;
+        }
+        
+        .xp-stat {
+            color: #00d4aa;
+        }
+        
+        .tuercas-stat {
+            color: #ffd700;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #888;
+        }
+        
+        .error {
+            color: #ff6b6b;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .loading {
+            animation: pulse 2s infinite;
+        }
+        
+        .full-width {
+            grid-column: 1 / -1;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="character-section">
+            <div class="character-image" id="characterImage">
+                <div class="loading">Loading...</div>
+            </div>
+            <div class="character-name" id="characterName">Survivor</div>
+            <div class="badge" id="characterBadge">🎖️ Loading...</div>
+            
+            <div class="health-bar">
+                <div class="stat-label">Health Status</div>
+                <div class="health-hearts" id="healthHearts">❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️</div>
+                <div class="health-status" id="healthStatus">🟢 Healthy</div>
+            </div>
+            
+            <div class="level-bar">
+                <div class="stat-label">Level Progress</div>
+                <div class="level-display" id="levelDisplay">Lvl 0</div>
+                <div class="level-progress" id="levelProgress">🟩🟩🟩⬛⬛⬛⬛⬛⬛⬛ 0%</div>
+            </div>
+        </div>
+        
+        <div class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">Total XP</div>
+                    <div class="stat-value xp-stat" id="totalXP">0 XP</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-label">Tuercas</div>
+                    <div class="stat-value tuercas-stat" id="totalTuercas">0 ⚙️</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-label">Current Level</div>
+                    <div class="stat-value" id="currentLevel">0</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-label">XP to Next Level</div>
+                    <div class="stat-value xp-stat" id="xpToNext">0 XP</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-label">HP Remaining</div>
+                    <div class="stat-value" id="hpRemaining">100/100</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-label">Good Habits XP</div>
+                    <div class="stat-value xp-stat" id="goodHabitsXP">0 XP</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración de imágenes por nivel
+        const characterImages = {
+            low: 'https://drive.google.com/uc?export=view&id=1C-Vyu_6rAvtg5B4ChUkfqy1seXxX6uhn', // Niveles 0-4
+            high: 'https://drive.google.com/uc?export=view&id=1HeLHU7mmot2xpz_cFcP1_C0pqkpSp3nc' // Niveles 5+
+        };
+        
+        // URL de tu tabla RPG Character convertida para acceso CSV
+        const NOTION_CSV_URL = 'https://best-writer-d16.notion.site/2379a644bdaf817cbd48f31b06c5ef65?v=2379a644bdaf81a39a89000c921f6c99&csv=true';
+        
+        let currentData = null;
+        
+        function getCharacterImage(level) {
+            return level < 5 ? characterImages.low : characterImages.high;
+        }
+        
+        function updateCharacterImage(level) {
+            const imageContainer = document.getElementById('characterImage');
+            const imageUrl = getCharacterImage(level);
+            
+            imageContainer.innerHTML = `<img src="${imageUrl}" alt="Survivor Level ${level}">`;
+        }
+        
+        function parseCSVData(csvText) {
+            const lines = csvText.trim().split('\n');
+            if (lines.length < 2) return null;
+            
+            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+            const data = lines[1].split(',').map(d => d.trim().replace(/"/g, ''));
+            
+            const character = {};
+            headers.forEach((header, index) => {
+                character[header] = data[index] || '';
+            });
+            
+            return character;
+        }
+        
+        function updateDashboard(character) {
+            try {
+                // Actualizar nombre del personaje
+                document.getElementById('characterName').textContent = character['Title'] || 'Survivor JP';
+                
+                // Obtener y mostrar nivel
+                const levelRightNow = parseInt(character['Level Right Now']) || 0;
+                document.getElementById('currentLevel').textContent = levelRightNow;
+                
+                // Actualizar imagen según el nivel
+                updateCharacterImage(levelRightNow);
+                
+                // Actualizar badge
+                document.getElementById('characterBadge').textContent = character['Badge'] || '🎖️ Rookie Survivor';
+                
+                // Actualizar XP total
+                const allTimeXP = parseInt(character['All Time XP']) || 0;
+                document.getElementById('totalXP').textContent = `${allTimeXP} XP`;
+                
+                // Actualizar tuercas
+                const tuercas = character['⚙️'] || '0 ⚙️';
+                document.getElementById('totalTuercas').textContent = tuercas;
+                
+                // Actualizar HP
+                const hpLeft = parseInt(character['HP Left']) || 100;
+                const maxHP = parseInt(character['#Max HP']) || 100;
+                document.getElementById('hpRemaining').textContent = `${hpLeft}/${maxHP}`;
+                
+                // Actualizar corazones de salud
+                const hearts = character['HP'] || '❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️';
+                document.getElementById('healthHearts').textContent = hearts;
+                
+                // Actualizar estado de salud
+                const healthStatus = character['Health Status'] || '🟢 Healthy';
+                document.getElementById('healthStatus').textContent = healthStatus;
+                
+                // Actualizar XP para siguiente nivel
+                const xpToNext = parseInt(character['XP to Level UP']) || 0;
+                document.getElementById('xpToNext').textContent = `${xpToNext} XP`;
+                
+                // Actualizar progreso de nivel
+                const levelProgress = character['Level'] || 'Lvl 0 | ⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛ 0%';
+                const levelParts = levelProgress.split(' | ');
+                document.getElementById('levelDisplay').textContent = levelParts[0] || `Lvl ${levelRightNow}`;
+                document.getElementById('levelProgress').textContent = levelParts[1] || '⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛ 0%';
+                
+                // Actualizar XP de buenos hábitos
+                const goodHabitsXP = parseInt(character['Good Habits EXPS']) || 0;
+                document.getElementById('goodHabitsXP').textContent = `${goodHabitsXP} XP`;
+                
+            } catch (error) {
+                console.error('Error updating dashboard:', error);
+                showError('Error updating dashboard data');
+            }
+        }
+        
+        function showError(message) {
+            document.querySelector('.dashboard').innerHTML = `<div class="error full-width">${message}</div>`;
+        }
+        
+        function showLoading() {
+            document.getElementById('characterImage').innerHTML = '<div class="loading">Loading character...</div>';
+        }
+        
+        async function fetchCharacterData() {
+            try {
+                showLoading();
+                
+                // Nota: Debido a las limitaciones de CORS, necesitarás usar un proxy o hacer la página pública
+                // Por ahora, usaremos datos de ejemplo
+                
+                const response = await fetch(NOTION_CSV_URL, {
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'text/csv'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const csvData = await response.text();
+                const character = parseCSVData(csvData);
+                
+                if (character) {
+                    updateDashboard(character);
+                    currentData = character;
+                } else {
+                    throw new Error('No character data found');
+                }
+                
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                
+                // Usar datos de ejemplo para la demo
+                const exampleData = {
+                    'Title': 'Survivor JP',
+                    'Level Right Now': '0',
+                    'Badge': '🎖️ Rookie Survivor',
+                    'All Time XP': '0',
+                    '⚙️': '0 ⚙️',
+                    'HP Left': '100',
+                    '#Max HP': '100',
+                    'HP': '❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️',
+                    'Health Status': '🟢 Healthy',
+                    'XP to Level UP': '4',
+                    'Level': 'Lvl 0 | ⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛ 0%',
+                    'Good Habits EXPS': '0'
+                };
+                
+                updateDashboard(exampleData);
+            }
+        }
+        
+        // Actualizar datos cada 30 segundos
+        function startAutoUpdate() {
+            fetchCharacterData();
+            setInterval(fetchCharacterData, 30000);
+        }
+        
+        // Iniciar cuando la página cargue
+        document.addEventListener('DOMContentLoaded', startAutoUpdate);
+    </script>
+</body>
+</html>
